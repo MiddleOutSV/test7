@@ -4,12 +4,21 @@ import pandas as pd
 import plotly.express as px
 from ta.momentum import RSIIndicator
 from pytrends.request import TrendReq
+import time
 
 # 구글 트렌드 데이터 가져오기
 def get_google_trends(tickers):
     pytrends = TrendReq(hl='en-US', tz=360)
-    pytrends.build_payload(tickers, timeframe='today 3-m')
-    trends_data = pytrends.interest_over_time()
+    trends_data = pd.DataFrame()
+    for ticker in tickers:
+        try:
+            pytrends.build_payload([ticker], timeframe='today 3-m')
+            time.sleep(1)  # 대기 시간 추가
+            interest_over_time_df = pytrends.interest_over_time()
+            if not interest_over_time_df.empty:
+                trends_data[ticker] = interest_over_time_df[ticker]
+        except Exception as e:
+            st.error(f"Error fetching Google Trends data for {ticker}: {e}")
     return trends_data.mean()
 
 # 금융 데이터 가져오기
