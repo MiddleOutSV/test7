@@ -5,15 +5,22 @@ import plotly.express as px
 from ta.momentum import RSIIndicator
 from pytrends.request import TrendReq
 import time
+import random
 
 # 구글 트렌드 데이터 가져오기
 def get_google_trends(tickers):
     pytrends = TrendReq(hl='en-US', tz=360)
+    proxies = [
+        'http://proxy1.example.com:8080',
+        'http://proxy2.example.com:8080',
+        'http://proxy3.example.com:8080'
+    ]
     trends_data = pd.DataFrame()
     for ticker in tickers:
         try:
+            pytrends = TrendReq(hl='en-US', tz=360, proxies={'http': random.choice(proxies)})
             pytrends.build_payload([ticker], timeframe='today 3-m')
-            time.sleep(1)  # 대기 시간 추가
+            time.sleep(10)  # 대기 시간 추가
             interest_over_time_df = pytrends.interest_over_time()
             if not interest_over_time_df.empty:
                 trends_data[ticker] = interest_over_time_df[ticker]
